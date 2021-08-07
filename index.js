@@ -317,6 +317,37 @@ app.get("/employeesLoad/:id", (req, res) => {
     
   });
 
+//view product
+app.get("/viewProduct",(req,res)=>{
+  product_id=req.params.product_id;
+  db.query("SELECT * FROM products WHERE product_id=?",[req.query.product_id],(err,result)=>{
+    console.log(req.query.product_id);
+    res.send(result);
+  });
+  
+});
+
+//view category
+app.get("/viewCategory",(req,res)=>{
+  category_id=req.params.category_id;
+  db.query("SELECT * FROM category WHERE category_id=?",[req.query.category_id],(err,result)=>{
+    console.log(req.query.category_id);
+    res.send(result);
+  });
+  
+});
+
+//view gift
+app.get("/viewGift",(req,res)=>{
+  ID=req.params.ID;
+  db.query("SELECT * FROM gift WHERE ID=?",[req.query.ID],(err,result)=>{
+    console.log(req.query.ID);
+    res.send(result);
+  });
+  
+});
+
+
 //update
 app.put("/update/:id",(req,res)=>{
   const id = req.params.id;
@@ -410,9 +441,10 @@ const price = req.body.price;
 const material = req.body.material;
 const quantity = req.body.quantity;
 const category_id=req.body.category_id;
+const description=req.body.description;
 
 db.query(
-  "INSERT INTO products(name,price,product_img,material,quantity,category_id) VALUES (?,?,?,?,?,?)",[name,price,product_img,material,quantity,category_id],
+  "INSERT INTO products(name,price,product_img,material,quantity,category_id,description) VALUES (?,?,?,?,?,?,?)",[name,price,product_img,material,quantity,category_id,description],
   (err,result)=>{
     if(err){
       console.log(err)
@@ -443,6 +475,44 @@ db.query(
 );
 })
 
+//update category
+app.put('/updateCategory', (req,res) => {
+  const category_id=req.body.category_id;
+  const name = req.body.name;
+  const date = req.body.date;
+  db.query("UPDATE category SET name = ?,date=? WHERE category_id = ?", 
+  [name,date,category_id], 
+  (err, result) => {
+      if (err) {
+          console.log(err);
+      } else {
+          res.send(result);
+      }
+     }
+  );
+});
+
+//update Employee
+app.put('/updateEmployee', (req,res) => {
+  const id=req.body.id;
+  const name = req.body.name;
+ const role=req.body.role;
+ const email=req.body.email;
+ const address=req.body.address;
+ const NIC=req.body.NIC;
+ const phone_no=req.body.phone_no;
+ const job_start_date=req.body.job_start_date;
+  db.query("UPDATE employee SET name = ?,role=?,email=?,address=?,NIC=?,phone_no=?,job_start_date=? WHERE id = ?", 
+  [name,role,email,address,NIC,phone_no,job_start_date,id], 
+  (err, result) => {
+      if (err) {
+          console.log(err);
+      } else {
+          res.send(result);
+      }
+     }
+  );
+});
 
 
 app.listen(3001,()=>{
