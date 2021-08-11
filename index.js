@@ -173,12 +173,30 @@ app.post('/AddCategory',(req,res)=>{
 });
 
 app.get('/load',(req,res)=>{
-    db.query('SELECT * FROM employee ',(err,result,fields)=>{
+    db.query('SELECT * FROM employee WHERE NOT role="admin" ',(err,result,fields)=>{
         if(!err)
         res.send(result);
         else
         console.log(err);
     })
+})
+
+app.get('/loadEmployee',(req,res)=>{
+  db.query('SELECT name,role,emp_img FROM employee WHERE NOT role="admin" ',(err,result,fields)=>{
+      if(!err)
+      res.send(result);
+      else
+      console.log(err);
+  })
+})
+
+app.get('/recentOrders',(req,res)=>{
+  db.query('SELECT products.name,products.product_img,orders.total_price FROM orders INNER JOIN products ON orders.product_id=products.product_id ORDER BY orders.order_last_date DESC LIMIT 5 ',(err,result,fields)=>{
+      if(!err)
+      res.send(result);
+      else
+      console.log(err);
+  })
 })
 
 app.get('/loadCategory',(req,res)=>{
@@ -492,6 +510,46 @@ app.put('/updateCategory', (req,res) => {
   );
 });
 
+//update Gift
+app.put('/updateGift', (req,res) => {
+  const ID=req.body.ID;
+  const name = req.body.name;
+  const price = req.body.price;
+  const gift_img = req.body.gift_img;
+  const quantity = req.body.quantity;
+  db.query("UPDATE gift SET name = ?,price=?,gift_img=?,quantity=? WHERE ID = ?", 
+  [name,price,gift_img,quantity,ID], 
+  (err, result) => {
+      if (err) {
+          console.log(err);
+      } else {
+          res.send(result);
+      }
+     }
+  );
+});
+
+//update Gift
+app.put('/updateProduct', (req,res) => {
+  const product_id=req.body.product_id;
+  const name = req.body.name;
+  const price = req.body.price;
+  const product_img = req.body.product_img;
+  const quantity = req.body.quantity;
+  const material = req.body.material;
+  const category_id=req.body.category_id;
+  db.query("UPDATE products SET name = ?,price=?,product_img=?,material=?,category_id=?,quantity=? WHERE product_id = ?", 
+  [name,price,product_img,material,category_id,quantity,product_id], 
+  (err, result) => {
+      if (err) {
+          console.log(err);
+      } else {
+          res.send(result);
+      }
+     }
+  );
+});
+
 //update Employee
 app.put('/updateEmployee', (req,res) => {
   const id=req.body.id;
@@ -514,6 +572,166 @@ app.put('/updateEmployee', (req,res) => {
   );
 });
 
+
+//Charts
+app.get('/CategoryNoChart',(req,res) => {
+  db.query('SELECT SUM(products.quantity) AS quantity, category.name FROM products INNER JOIN category ON products.category_id=category.category_id GROUP BY products.category_id', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+          console.log(result);
+          
+      }
+  });
+});
+
+//customized order pie chart
+app.get('/Cus_OrderChart',(req,res) => {
+  db.query('SELECT SUM(quantity) AS quantity, category_name FROM customized_products GROUP BY category_name', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+          console.log(result);
+          
+      }
+  });
+});
+
+//customer analytics
+//customized order pie chart
+app.get('/CustomerCount',(req,res) => {
+  db.query('SELECT EXTRACT(MONTH FROM date) AS month, COUNT(customer_id) AS count FROM customer GROUP BY month', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+          console.log(result);
+          
+      }
+  });
+});
+
+
+//employeeCount
+app.get('/EmployeeCount',(req,res) => {
+  db.query('SELECT COUNT(id) AS count FROM employee', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+          
+      }
+  });
+});
+
+//customerCount
+app.get('/CustomerCount',(req,res) => {
+  db.query('SELECT COUNT(customer_id) AS cuscount FROM customer', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+         
+      }
+  });
+});
+
+//orderCount
+app.get('/OrderCount',(req,res) => {
+  db.query('SELECT COUNT(order_id) AS ordcount FROM orders', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+         
+      }
+  });
+});
+
+//productCount
+app.get('/ProductCount',(req,res) => {
+  db.query('SELECT COUNT(product_id) AS procount FROM products', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+         
+      }
+  });
+});
+
+//categoryCount
+app.get('/CategoryCount',(req,res) => {
+  db.query('SELECT COUNT(category_id) AS catcount FROM category', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+         
+      }
+  });
+});
+
+//returnCount
+app.get('/ReturnCount',(req,res) => {
+  db.query('SELECT COUNT(returned_id) AS returncount FROM return_item', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+         
+      }
+  });
+});
+
+//deliverCount
+app.get('/DeliverCount',(req,res) => {
+  db.query('SELECT COUNT(id) AS deliver_count FROM employee WHERE role="Deliveryperson"', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+         
+      }
+  });
+});
+
+//income
+app.get('/TotalIncome',(req,res) => {
+  db.query('SELECT SUM(total_price) AS income FROM orders', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+         
+      }
+  });
+});
+
+//order analytics
+app.get('/Order',(req,res) => {
+  db.query('SELECT products.name,customer.name AS cus_name,orders.o_date,orders.total_price FROM ((orders INNER JOIN products ON orders.product_id=products.product_id) INNER JOIN customer ON orders.customer_id=customer.customer_id)', (err, result) => {
+      if(err) {
+          console.log(err)
+      }else {
+          res.send(result);
+         
+      }
+  });
+});
+
+//order details
+app.get("/OrderDetails",(req,res)=>{
+  todate=req.params.todate;
+  fromdate=req.params.fromdate;
+  db.query('SELECT products.name,customer.name,orders.o_date,orders.total_price FROM ((orders INNER JOIN products ON orders.product_id=products.product_id) INNER JOIN customer ON orders.customer_id=customer.customer_id) WHERE orders.o_date BETWEEN o_date=? AND "o_date=?"',[req.query.fromdate],[req.query.todate],(err,result)=>{
+    console.log(req.query.id);
+    res.send(result);
+  });
+  
+});
 
 app.listen(3001,()=>{
     console.log("Your server is running on port 3001");
